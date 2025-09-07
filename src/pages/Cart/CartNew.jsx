@@ -34,7 +34,7 @@ const Cart = ({ currentLanguage = 'fr' }) => {
       orderDetails: 'Finaliser la commande',
       customerName: 'Nom complet',
       customerEmail: 'Email',
-      customerPhone: 'Téléphone (optionnel)',
+      customerPhone: 'Téléphone',
       shippingAddress: 'Adresse de livraison',
       submitOrder: 'Valider la commande',
       backToCart: 'Retour au panier',
@@ -60,7 +60,7 @@ const Cart = ({ currentLanguage = 'fr' }) => {
       orderDetails: 'إنهاء الطلب',
       customerName: 'الاسم الكامل',
       customerEmail: 'البريد الإلكتروني',
-      customerPhone: 'رقم الهاتف (اختياري)',
+      customerPhone: 'رقم الهاتف',
       shippingAddress: 'عنوان التسليم',
       submitOrder: 'تأكيد الطلب',
       backToCart: 'العودة إلى السلة',
@@ -86,7 +86,7 @@ const Cart = ({ currentLanguage = 'fr' }) => {
       orderDetails: 'Complete Order',
       customerName: 'Full Name',
       customerEmail: 'Email',
-      customerPhone: 'Phone (optional)',
+      customerPhone: 'Phone',
       shippingAddress: 'Shipping Address',
       submitOrder: 'Submit Order',
       backToCart: 'Back to Cart',
@@ -148,6 +148,10 @@ const Cart = ({ currentLanguage = 'fr' }) => {
       errors.customerEmail = t.invalidEmail;
     }
     
+    if (!orderForm.customerPhone.trim()) {
+      errors.customerPhone = t.required;
+    }
+    
     if (!orderForm.shippingAddress.trim()) {
       errors.shippingAddress = t.required;
     }
@@ -172,7 +176,7 @@ const Cart = ({ currentLanguage = 'fr' }) => {
       const orderData = {
         customer_name: orderForm.customerName,
         customer_email: orderForm.customerEmail,
-        customer_phone: orderForm.customerPhone || null,
+        customer_phone: orderForm.customerPhone,
         shipping_address: orderForm.shippingAddress,
         total_amount: parseFloat(getCartTotal()),
         status: 'pending'
@@ -314,14 +318,19 @@ const Cart = ({ currentLanguage = 'fr' }) => {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="customerPhone">{t.customerPhone}</label>
+              <label htmlFor="customerPhone">{t.customerPhone} *</label>
               <input
                 type="tel"
                 id="customerPhone"
                 name="customerPhone"
                 value={orderForm.customerPhone}
                 onChange={handleInputChange}
+                className={orderError?.customerPhone ? styles.error : ''}
+                required
               />
+              {orderError?.customerPhone && (
+                <span className={styles.errorText}>{orderError.customerPhone}</span>
+              )}
             </div>
 
             <div className={styles.formGroup}>
