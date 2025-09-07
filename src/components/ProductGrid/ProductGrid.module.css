@@ -1,0 +1,332 @@
+.productGrid {
+  padding: 4rem 0;
+  background-color: #f9f9f9;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+/* Responsive grid */
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.productCard {
+  background: var(--white);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.productCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(231, 84, 128, 0.15);
+}
+
+.productCard:focus {
+  outline: 2px solid var(--pink-main);
+  outline-offset: 2px;
+}
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+}
+
+.productImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.productCard:hover .productImage {
+  transform: scale(1.05);
+}
+
+.outOfStockBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.productInfo {
+  padding: 1.5rem;
+}
+
+.productName {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--pink-dark);
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.productDescription {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.productMeta {
+  margin-bottom: 1rem;
+}
+
+.price {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: var(--pink-main);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.size,
+.color {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.addToCartBtn {
+  width: 100%;
+  background: linear-gradient(to right, var(--pink-main), var(--pink-dark));
+  color: var(--white);
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.addToCartBtn:hover:not(.disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(231, 84, 128, 0.3);
+}
+
+.addToCartBtn.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Skeleton Loading Styles */
+.skeletonCard {
+  background: var(--white);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.skeletonImage {
+  width: 100%;
+  height: 250px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+.skeletonContent {
+  padding: 1.5rem;
+}
+
+.skeletonLine {
+  height: 16px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+}
+
+.skeletonLine:first-child {
+  width: 80%;
+}
+
+.skeletonLine:nth-child(2) {
+  width: 60%;
+}
+
+.skeletonPrice {
+  height: 20px;
+  width: 40%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.skeletonButton {
+  height: 45px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Error State */
+.error {
+  text-align: center;
+  padding: 3rem;
+  color: var(--pink-dark);
+}
+
+.error p {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.retryButton {
+  background: var(--pink-main);
+  color: var(--white);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.retryButton:hover {
+  background: var(--pink-dark);
+}
+
+/* RTL Support */
+.productGrid[dir="rtl"] .outOfStockBadge {
+  left: auto;
+  right: 10px;
+}
+
+.productGrid[dir="rtl"] .productInfo {
+  text-align: right;
+}
+
+.productGrid[dir="rtl"] .details {
+  align-items: flex-end;
+}
+
+/* Load More Section */
+.loadMoreSection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 3rem;
+  padding: 2rem 0;
+}
+
+.loadMoreButton {
+  background: linear-gradient(to right, var(--pink-main), var(--pink-dark));
+  color: var(--white);
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  min-width: 150px;
+}
+
+.loadMoreButton:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(231, 84, 128, 0.3);
+}
+
+.loadMoreButton:active {
+  transform: translateY(-1px);
+}
+
+.loadingMore {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--pink-main);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--pink-light);
+  border-top: 3px solid var(--pink-main);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadMoreError {
+  text-align: center;
+  padding: 2rem;
+  margin-top: 2rem;
+  background: rgba(255, 0, 0, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 0, 0, 0.2);
+}
+
+.loadMoreError p {
+  color: #d32f2f;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.loadMoreError .retryButton {
+  background: #d32f2f;
+  color: white;
+}
+
+.loadMoreError .retryButton:hover {
+  background: #b71c1c;
+}

@@ -1,0 +1,135 @@
+.aboutUsSection {
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, #fdf2f8 0%, #fcf4ff 100%);
+  min-height: 60vh;
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 3rem;
+}
+
+.textContent {
+  flex: 1;
+  max-width: 600px;
+  padding: 1rem;
+}
+
+.heading {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #e75480;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  font-family: 'Georgia', serif;
+}
+
+.description {
+  font-size: 1.2rem;
+  line-height: 1.7;
+  color: #374151;
+  margin-bottom: 2.5rem;
+  font-weight: 400;
+}
+
+.highlights {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 1.2rem;
+}
+
+.highlight {
+  font-size: 1.1rem;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.highlight:hover {
+  color: #e75480;
+  transform: translateX(5px);
+}
+
+.icon {
+  font-size: 1.5rem;
+  margin-right: 0.8rem;
+  color: #e75480;
+  min-width: 24px;
+}
+
+.imageContent {
+  flex: 1;
+  max-width: 500px;
+  padding: 1rem;
+}
+
+.image {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(231, 84, 128, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.image:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(231, 84, 128, 0.2);
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 768px) {
+  .aboutUsSection {
+    padding: 3rem 1rem;
+  }
+
+  .container {
+    flex-direction: column;
+    text-align: center;
+    gap: 2rem;
+  }
+
+  .textContent {
+    max-width: 100%;
+    order: 1;
+  }
+
+  .imageContent {
+    max-width: 100%;
+    order: 2;
+  }
+
+  .heading {
+    font-size: 2.5rem;
+  }
+
+  .description {
+    font-size: 1.1rem;
+  }
+
+  .highlights {
+    text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .heading {
+    font-size: 2rem;
+  }
+
+  .description {
+    font-size: 1rem;
+  }
+
+  .highlight {
+    font-size: 1rem;
+  }
+}

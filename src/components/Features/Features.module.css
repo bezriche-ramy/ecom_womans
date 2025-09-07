@@ -1,0 +1,149 @@
+.featuresSection {
+  padding: 4rem 0;
+  background: var(--white);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--pink-dark);
+  margin-bottom: 3rem;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  align-items: start;
+}
+
+.featureCard {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(231, 84, 128, 0.08);
+  border: 1px solid rgba(231, 84, 128, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.featureCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(231, 84, 128, 0.15);
+  border-color: var(--pink-light);
+}
+
+.featureCard:focus {
+  outline: 2px solid var(--pink-main);
+  outline-offset: 2px;
+}
+
+.iconContainer {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  background: linear-gradient(135deg, var(--pink-main), var(--pink-dark));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.featureCard:hover .iconContainer {
+  transform: scale(1.1);
+}
+
+.icon {
+  font-size: 2rem;
+  color: var(--white);
+}
+
+.featureTitle {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--pink-dark);
+  margin-bottom: 1rem;
+}
+
+.featureDescription {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #666;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .featuresGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .featureCard {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .featuresGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .featureCard {
+    padding: 1.5rem;
+  }
+
+  .iconContainer {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 1rem;
+  }
+
+  .icon {
+    font-size: 1.5rem;
+  }
+
+  .featureTitle {
+    font-size: 1.2rem;
+  }
+
+  .featureDescription {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .featuresGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .featureCard {
+    padding: 1rem;
+  }
+}
+
+/* RTL Support */
+.featuresSection[dir="rtl"] .featureCard {
+  text-align: center;
+}
+
+.featuresSection[dir="rtl"] .featureTitle,
+.featuresSection[dir="rtl"] .featureDescription {
+  text-align: center;
+}

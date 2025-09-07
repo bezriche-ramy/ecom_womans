@@ -1,35 +1,69 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { CartProvider } from './contexts/CartContext';
+import Navigation from './components/Navigation/Navigation';
+import Hero from './components/Hero';
+import ProductGrid from './components/ProductGrid';
+import AboutUsSection from './components/AboutUsSection/AboutUsSection';
+import ClientReviews from './components/ClientReviews';
+import Features from './components/Features';
+import Footer from './components/Footer/Footer';
+import AdminPanel from './pages/AdminPanel/AdminPanel';
+import ProductDetail from './components/ProductDetail/ProductDetail';
+import Cart from './pages/Cart/Cart';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [currentLanguage, setCurrentLanguage] = useState(localStorage.getItem('language') || 'fr');
+
+  const handleLanguageChange = (newLang) => {
+    setCurrentLanguage(newLang);
+    localStorage.setItem('language', newLang);
+  };
+
+  const MainPage = () => (
+    <>
+      <Navigation
+        isLoggedIn={false}
+        currentLanguage={currentLanguage}
+        onLanguageChange={handleLanguageChange}
+      />
+      <Hero currentLanguage={currentLanguage} />
+      <ProductGrid 
+        currentLanguage={currentLanguage}
+      />
+      <AboutUsSection />
+      <ClientReviews currentLanguage={currentLanguage} />
+      <Features currentLanguage={currentLanguage} />
+      <Footer />
+    </>
+  );
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <CartProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<MainPage />} />
+          <Route 
+            path="/products/:id" 
+            element={
+              <ProductDetail 
+                currentLanguage={currentLanguage}
+              />
+            } 
+          />
+          <Route 
+            path="/cart" 
+            element={
+              <Cart 
+                currentLanguage={currentLanguage}
+              />
+            } 
+          />
+          <Route path="/adminpanel" element={<AdminPanel />} />
+        </Routes>
+      </Router>
+    </CartProvider>
+  );
 }
 
-export default App
+export default App;

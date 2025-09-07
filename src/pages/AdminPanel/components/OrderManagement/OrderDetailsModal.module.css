@@ -1,0 +1,431 @@
+/* Modal Overlay */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(2px);
+}
+
+.modalContent {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Modal Header */
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  border-bottom: 1px solid #e5e5e5;
+  background: #f8f9fa;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #666;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.closeButton:hover {
+  background: #e5e5e5;
+  color: #333;
+}
+
+/* Modal Body */
+.modalBody {
+  padding: 32px;
+  max-height: calc(90vh - 140px);
+  overflow-y: auto;
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.section h3 {
+  margin: 0 0 16px 0;
+  color: #e75480;
+  font-size: 18px;
+  font-weight: 600;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+/* Info Rows */
+.infoRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 8px 0;
+}
+
+.infoRow:last-child {
+  margin-bottom: 0;
+}
+
+.icon {
+  color: #e75480;
+  font-size: 16px;
+  width: 20px;
+}
+
+.label {
+  font-weight: 600;
+  color: #555;
+  min-width: 120px;
+  font-size: 14px;
+}
+
+.value {
+  color: #333;
+  font-size: 14px;
+}
+
+/* Status Select */
+.statusSelect {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.statusPending {
+  background: #fff3cd;
+  color: #856404;
+  border-color: #ffeaa7;
+}
+
+.statusProcessing {
+  background: #cce5ff;
+  color: #0066cc;
+  border-color: #99ccff;
+}
+
+.statusShipped {
+  background: #e7f3ff;
+  color: #0052cc;
+  border-color: #b3d9ff;
+}
+
+.statusDelivered {
+  background: #d4edda;
+  color: #155724;
+  border-color: #a3d5a3;
+}
+
+.statusCancelled {
+  background: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
+}
+
+/* Order Info */
+.orderInfo,
+.customerInfo {
+  background: #fafafa;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+/* Address Info */
+.addressInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: #fafafa;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.addressIcon {
+  color: #e75480;
+  font-size: 18px;
+  margin-top: 2px;
+}
+
+.addressDetails p {
+  margin: 0 0 4px 0;
+  color: #333;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.addressDetails p:last-child {
+  margin-bottom: 0;
+}
+
+/* Order Items */
+.itemsList {
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.orderItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  background: white;
+}
+
+.orderItem:last-child {
+  border-bottom: none;
+}
+
+.itemDetails h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.itemSpecs {
+  display: flex;
+  gap: 16px;
+  color: #666;
+  font-size: 14px;
+}
+
+.itemSpecs span {
+  background: #f8f9fa;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.itemPrice {
+  text-align: right;
+}
+
+.unitPrice {
+  display: block;
+  color: #666;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.totalPrice {
+  font-weight: 600;
+  color: #333;
+  font-size: 16px;
+}
+
+/* Payment Info */
+.paymentInfo {
+  background: #fafafa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.paymentInfo .infoRow {
+  margin-bottom: 0;
+}
+
+/* Order Summary */
+.orderSummary {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  color: #555;
+  font-size: 14px;
+}
+
+.summaryRow:last-child {
+  margin-bottom: 0;
+}
+
+.summaryRowTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 2px solid #ddd;
+  font-weight: 600;
+  font-size: 18px;
+  color: #333;
+}
+
+/* Modal Footer */
+.modalFooter {
+  padding: 20px 32px;
+  border-top: 1px solid #e5e5e5;
+  background: #f8f9fa;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.closeFooterButton {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.closeFooterButton:hover {
+  background: #5a6268;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .modalOverlay {
+    padding: 10px;
+  }
+
+  .modalContent {
+    max-height: 95vh;
+  }
+
+  .modalHeader {
+    padding: 16px 20px;
+  }
+
+  .modalHeader h2 {
+    font-size: 20px;
+  }
+
+  .modalBody {
+    padding: 20px;
+  }
+
+  .section {
+    margin-bottom: 24px;
+  }
+
+  .section h3 {
+    font-size: 16px;
+  }
+
+  .infoRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    margin-bottom: 16px;
+  }
+
+  .label {
+    min-width: auto;
+    font-size: 12px;
+    color: #666;
+  }
+
+  .value {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .statusSelect {
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .orderItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .itemPrice {
+    text-align: left;
+    width: 100%;
+  }
+
+  .itemSpecs {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .addressInfo {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .modalFooter {
+    padding: 16px 20px;
+  }
+
+  .closeFooterButton {
+    width: 100%;
+  }
+}
+
+/* Scrollbar Styling */
+.modalBody::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modalBody::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.modalBody::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.modalBody::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
