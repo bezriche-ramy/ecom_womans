@@ -23,7 +23,7 @@ import {
 } from '../../../../services/adminService';
 import styles from './Statistics.module.css';
 
-const Statistics = () => {
+const Statistics = ({ onNavigate }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('month');
   const [error, setError] = useState(null);
@@ -128,31 +128,49 @@ const Statistics = () => {
       setIsLoading(true);
       setError(null);
       
-      // Try to load from database, fallback to mock data
-      try {
-        const [dashboardStats, revenueData, topProducts, lowStockProducts] = await Promise.all([
-          getDashboardStats(),
-          getRevenueChartData(timeRange === 'year' ? 12 : 6),
-          getTopProducts(10),
-          getLowStockProducts(10)
-        ]);
+      console.log('=== LOADING DASHBOARD STATISTICS ===');
+      
+      // Load from database - no fallback to mock data
+      const [dashboardStats, revenueData, topProducts, lowStockProducts] = await Promise.all([
+        getDashboardStats(),
+        getRevenueChartData(timeRange === 'year' ? 12 : 6),
+        getTopProducts(10),
+        getLowStockProducts(10)
+      ]);
 
-        setStats(dashboardStats);
-        setChartData({
-          revenueChart: revenueData,
-          topProducts,
-          lowStockProducts
-        });
-      } catch (dbError) {
-        // Fallback to demo data if database connection fails
-        setStats(mockStats);
-        setChartData(mockChartData);
-      }
+      console.log('Dashboard stats loaded:', dashboardStats);
+      console.log('Revenue data loaded:', revenueData);
+      console.log('Top products loaded:', topProducts);
+      console.log('Low stock products loaded:', lowStockProducts);
+
+      setStats(dashboardStats);
+      setChartData({
+        revenueChart: revenueData,
+        topProducts,
+        lowStockProducts
+      });
+      
     } catch (error) {
       console.error('Error loading statistics:', error);
-      setError('Failed to load statistics. Using demo data.');
-      setStats(mockStats);
-      setChartData(mockChartData);
+      setError(`Failed to load statistics from database: ${error.message}`);
+      
+      // Show empty/zero stats instead of mock data
+      setStats({
+        totalProducts: 0,
+        totalOrders: 0,
+        totalRevenue: 0,
+        lowStockItems: 0,
+        totalCustomers: 0,
+        revenueGrowth: 0,
+        orderGrowth: 0,
+        customerGrowth: 0,
+        statusDistribution: {}
+      });
+      setChartData({
+        revenueChart: [],
+        topProducts: [],
+        lowStockProducts: []
+      });
     } finally {
       setIsLoading(false);
     }
@@ -168,12 +186,18 @@ const Statistics = () => {
   };
 
   const formatGrowth = (growth) => {
-    const isPositive = growth >= 0;
+    const num = Number(growth) || 0;
+    const isPositive = num > 0;
+    const isNegative = num < 0;
+    const isZero = num === 0;
     return {
-      value: Math.abs(growth).toFixed(1),
+      raw: num,
+      value: Math.abs(num).toFixed(1),
       isPositive,
-      icon: isPositive ? FaArrowUp : FaArrowDown,
-      color: isPositive ? '#10b981' : '#ef4444'
+      isNegative,
+      isZero,
+      icon: isPositive ? FaArrowUp : (isNegative ? FaArrowDown : FaChartBar),
+      color: isPositive ? '#10b981' : (isNegative ? '#ef4444' : '#6b7280')
     };
   };
 
@@ -214,6 +238,32 @@ const Statistics = () => {
   const revenueGrowthData = formatGrowth(stats.revenueGrowth);
   const orderGrowthData = formatGrowth(stats.orderGrowth);
   const customerGrowthData = formatGrowth(stats.customerGrowth);
+
+  // If the fetched revenue chart is empty or all zeros, derive a fallback
+  // revenue chart from the total revenue and total orders so the chart
+  // reflects the same data shown in the stat cards.
+  const revenueChartToUse = (() => {
+    const rc = chartData.revenueChart || [];
+    const hasNonZero = rc.some(d => d && Number(d.revenue) > 0);
+    if (hasNonZero && rc.length > 0) return rc;
+
+    // Fallback: distribute totalRevenue / totalOrders across N periods
+    const N = Math.max(rc.length, 6);
+    const totalRev = Number(stats.totalRevenue) || 0;
+    const totalOrders = Number(stats.totalOrders) || 0;
+    const perRev = N > 0 ? totalRev / N : 0;
+    const perOrders = N > 0 ? Math.round(totalOrders / N) : 0;
+
+    const months = [];
+    // generate last N month labels (e.g., Apr 2025)
+    for (let i = N - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const period = d.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+      months.push({ period, revenue: perRev, orders: perOrders });
+    }
+    return months;
+  })();
 
   return (
     <div className={styles.statistics}>
@@ -273,8 +323,12 @@ const Statistics = () => {
           <div className={styles.statContent}>
             <h3>{stats.totalOrders.toLocaleString()}</h3>
             <p>Total Orders</p>
-            <div className={styles.growth} style={{ color: orderGrowthData.color }}>
-              {orderGrowthData.value}% vs last period
+            <div className={styles.growth}>
+              <div className={`${styles.growthPill} ${orderGrowthData.isPositive ? styles.growthPositive : orderGrowthData.isNegative ? styles.growthNegative : styles.growthNeutral}`}>
+                <orderGrowthData.icon style={{ fontSize: '0.9rem', color: orderGrowthData.color }} />
+                <span className={styles.growthValue}>{orderGrowthData.value}%</span>
+              </div>
+              <span className={styles.growthLabel}>vs last period</span>
             </div>
           </div>
         </div>
@@ -291,8 +345,12 @@ const Statistics = () => {
           <div className={styles.statContent}>
             <h3>{formatCurrency(stats.totalRevenue)}</h3>
             <p>Total Revenue</p>
-            <div className={styles.growth} style={{ color: revenueGrowthData.color }}>
-              {revenueGrowthData.value}% vs last period
+            <div className={styles.growth}>
+              <div className={`${styles.growthPill} ${revenueGrowthData.isPositive ? styles.growthPositive : revenueGrowthData.isNegative ? styles.growthNegative : styles.growthNeutral}`}>
+                <revenueGrowthData.icon style={{ fontSize: '0.9rem', color: revenueGrowthData.color }} />
+                <span className={styles.growthValue}>{revenueGrowthData.value}%</span>
+              </div>
+              <span className={styles.growthLabel}>vs last period</span>
             </div>
           </div>
         </div>
@@ -309,8 +367,12 @@ const Statistics = () => {
           <div className={styles.statContent}>
             <h3>{stats.totalCustomers.toLocaleString()}</h3>
             <p>Total Customers</p>
-            <div className={styles.growth} style={{ color: customerGrowthData.color }}>
-              {customerGrowthData.value}% vs last period
+            <div className={styles.growth}>
+              <div className={`${styles.growthPill} ${customerGrowthData.isPositive ? styles.growthPositive : customerGrowthData.isNegative ? styles.growthNegative : styles.growthNeutral}`}>
+                <customerGrowthData.icon style={{ fontSize: '0.9rem', color: customerGrowthData.color }} />
+                <span className={styles.growthValue}>{customerGrowthData.value}%</span>
+              </div>
+              <span className={styles.growthLabel}>vs last period</span>
             </div>
           </div>
         </div>
@@ -345,7 +407,12 @@ const Statistics = () => {
               Revenue Overview
             </h3>
             <div className={styles.chartActions}>
-              <button className={styles.chartButton}>
+              <button
+                className={styles.chartButton}
+                onClick={() => {
+                  if (typeof onNavigate === 'function') onNavigate('orders');
+                }}
+              >
                 <FaEye />
                 View Details
               </button>
@@ -355,9 +422,9 @@ const Statistics = () => {
             {chartData.revenueChart.length > 0 ? (
               <div className={styles.chartContainer}>
                 <div className={styles.chartGrid}>
-                  {chartData.revenueChart.map((data, index) => {
-                    const maxRevenue = Math.max(...chartData.revenueChart.map(d => d.revenue));
-                    const height = (data.revenue / maxRevenue) * 100;
+                  {revenueChartToUse.map((data, index) => {
+                    const maxRevenue = Math.max(...revenueChartToUse.map(d => d.revenue || 0), 1);
+                    const height = maxRevenue > 0 ? (data.revenue / maxRevenue) * 100 : 0;
                     return (
                       <div key={index} className={styles.chartBar}>
                         <div className={styles.barTooltip}>

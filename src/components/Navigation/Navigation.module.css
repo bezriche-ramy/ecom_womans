@@ -209,7 +209,7 @@
   display: flex;
   align-items: center;
   gap: 0.2rem;
-  background: var(--gray);
+  background: var(--pink-main);
   border-radius: 16px;
   padding: 2px 8px;
 }
@@ -231,7 +231,7 @@
   color: var(--pink-main);
 }
 .activeLang {
-  background: var(--pink-main);
+  background: black;
   color: var(--white) !important;
 }
 .langDivider {
@@ -262,6 +262,50 @@
 @keyframes slideInRtl {
   from { transform: translateX(-100%); }
   to { transform: translateX(0); }
+}
+
+/* Ensure the backdrop aligns correctly in RTL */
+.rtl .mobileMenuBackdrop {
+  justify-content: flex-start;
+}
+
+/* Smaller screen tweaks */
+@media (max-width: 600px) {
+  .navContainer {
+    padding: 0 1rem;
+  }
+  .logoImg {
+    width: 34px;
+    height: 34px;
+  }
+  .logoText {
+    font-size: 1.3rem;
+  }
+  .actions {
+    gap: 0.5rem;
+  }
+  .menu li a {
+    font-size: 1rem;
+  }
+  .mobileMenu {
+    width: 80vw;
+    max-width: 320px;
+    padding: 1.5rem 1rem;
+  }
+  .mobileMenu ul {
+    gap: 1rem;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 360px) {
+  .mobileMenu {
+    width: 100vw;
+    max-width: none;
+  }
+  .logoText {
+    display: none; /* keep logo compact */
+  }
 }
 
 @media (max-width: 900px) {

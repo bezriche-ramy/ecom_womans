@@ -13,8 +13,15 @@
   bottom: 0;
   background: rgba(0, 0, 0, 0.6);
   z-index: 999;
-  display: none;
   backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.overlay.active {
+  opacity: 1;
+  visibility: visible;
 }
 
 .sidebar {
@@ -79,8 +86,12 @@
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 6px;
-  display: none;
   transition: all 0.2s ease;
+  min-width: 44px;
+  min-height: 44px;
+  display: none;
+  align-items: center;
+  justify-content: center;
 }
 
 .closeSidebar:hover {
@@ -288,6 +299,11 @@
   border-radius: 6px;
   font-size: 1.2rem;
   transition: all 0.2s ease;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .menuToggle:hover {
@@ -334,8 +350,7 @@
   gap: 1rem;
 }
 
-.notificationButton,
-.settingsButton {
+.notificationButton {
   background: none;
   border: none;
   color: #6b7280;
@@ -347,8 +362,7 @@
   position: relative;
 }
 
-.notificationButton:hover,
-.settingsButton:hover {
+.notificationButton:hover {
   background: #f3f4f6;
   color: #e75480;
 }
@@ -469,12 +483,8 @@
 
 /* Mobile Styles */
 @media (max-width: 767px) {
-  .overlay {
-    display: block;
-  }
-
   .closeSidebar {
-    display: block;
+    display: flex;
   }
 
   .sidebar {
@@ -509,11 +519,10 @@
   }
 
   .notificationButton,
-  .settingsButton,
   .headerLogout {
-    padding: 0.375rem;
-    font-size: 1rem;
-  }
+      padding: 0.375rem;
+      font-size: 1rem;
+    }
 
   .content {
     padding: 1rem;
@@ -553,6 +562,67 @@
   .header {
     padding: 0.75rem 1rem;
   }
+  
+  .navItem {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .searchInput {
+    font-size: 0.9rem;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
+  .sidebar {
+    width: 260px;
+  }
+  
+  .sidebarHeader {
+    padding: 0.75rem;
+  }
+  
+  .logo {
+    font-size: 1.1rem;
+  }
+  
+  .content {
+    padding: 0.5rem;
+  }
+  
+  .header {
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* Landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .sidebar {
+    width: 260px;
+  }
+  
+  .sidebarHeader {
+    padding: 0.75rem 1rem;
+  }
+  
+  .navItem {
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* Safe area handling for modern mobile devices */
+@supports (padding: max(0px)) {
+  .header {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+  
+  .content {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
 }
 
 /* Accessibility Improvements */
@@ -574,7 +644,6 @@
 .closeSidebar:focus,
 .logoutButton:focus,
 .notificationButton:focus,
-.settingsButton:focus,
 .headerLogout:focus,
 .searchInput:focus {
   outline: 2px solid #e75480;

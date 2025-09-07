@@ -3,6 +3,7 @@
 :root {
   --blossom-primary: #e75480;
   --blossom-light: #f8e8ee;
+  --form-bg-pink: #ffeef4;
   --blossom-pale: #fdf5f8;
   --blossom-dark: #d13968;
   --text-primary: #2d3748;
@@ -320,6 +321,27 @@
   overflow: hidden;
 }
 
+/* Grid layout on wider screens: summary + form side-by-side */
+@media (min-width: 900px) {
+  .orderForm {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-items: start;
+  }
+  .orderTitle {
+    grid-column: 1 / -1;
+  }
+  .orderSummary {
+    padding: 2rem;
+    max-height: 70vh;
+    overflow: auto;
+  }
+  .form {
+    padding: 2rem;
+  }
+}
+
 .orderTitle {
   font-size: 2rem;
   font-weight: 700;
@@ -417,6 +439,17 @@
   font-size: 1rem;
   transition: var(--transition);
   font-family: inherit;
+  background: var(--form-bg-pink);
+  color: #000; /* black text as requested */
+}
+
+/* Make sure inputs don't cause overflow on narrow containers */
+.formGroup input,
+.formGroup textarea,
+.formGroup select {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0; /* prevents flex/grid overflow in some browsers */
 }
 
 .formGroup input:focus,
@@ -425,6 +458,19 @@
   outline: none;
   border-color: var(--blossom-primary);
   box-shadow: 0 0 0 3px rgba(231, 84, 128, 0.1);
+}
+
+/* Placeholder color should be readable on pink background */
+.formGroup input::placeholder,
+.formGroup textarea::placeholder {
+  color: rgba(0,0,0,0.6);
+}
+
+/* Error state respects visibility on pink background */
+.formGroup input.error,
+.formGroup textarea.error {
+  border-color: var(--error-red);
+  background: #ffecec;
 }
 
 .formGroup input.error,
@@ -592,11 +638,44 @@
   }
 
   .form {
-    padding: 1rem;
+  padding: 1rem;
   }
 
   .formActions {
     flex-direction: column;
+  }
+}
+
+/* Make the order form full-width and stack nicely on smaller screens */
+@media (max-width: 900px) {
+  .orderForm {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+  .orderTitle {
+    font-size: 1.5rem;
+    padding: 1rem;
+  }
+  .form {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .formGroup input,
+  .formGroup textarea,
+  .formGroup select {
+    padding: 0.65rem 0.9rem;
+    font-size: 1rem;
+  }
+  .formActions {
+    gap: 0.5rem;
+  }
+  .backButton,
+  .submitButton {
+    padding: 0.9rem 1rem;
+    font-size: 0.95rem;
   }
 }
 

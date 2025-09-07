@@ -9,7 +9,6 @@ import {
   FaHome,
   FaBell,
   FaUser,
-  FaCog,
   FaSearch
 } from 'react-icons/fa';
 import ProductManagement from '../ProductManagement/ProductManagement';
@@ -51,7 +50,7 @@ const Dashboard = ({ user, onLogout }) => {
         return <OrderManagement />;
       case 'statistics':
       case 'analytics':
-        return <Statistics />;
+        return <Statistics onNavigate={(section) => { setActiveSection(section); setIsSidebarOpen(false); }} />;
       default:
         return <Statistics />;
     }
@@ -65,13 +64,11 @@ const Dashboard = ({ user, onLogout }) => {
   return (
     <div className={styles.dashboard}>
       {/* Mobile Menu Overlay */}
-      {isSidebarOpen && (
-        <div 
-          className={styles.overlay} 
-          onClick={() => setIsSidebarOpen(false)}
-          aria-hidden="true"
-        />
-      )}
+      <div 
+        className={`${styles.overlay} ${isSidebarOpen ? styles.active : ''}`}
+        onClick={() => setIsSidebarOpen(false)}
+        aria-hidden={!isSidebarOpen}
+      />
 
       {/* Sidebar */}
       <aside className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : ''}`}>
@@ -169,14 +166,19 @@ const Dashboard = ({ user, onLogout }) => {
           </div>
 
           <div className={styles.headerRight}>
-            <button className={styles.notificationButton} title="Notifications">
+            <button
+              className={styles.notificationButton}
+              title="Notifications"
+              onClick={() => {
+                setActiveSection('orders');
+                setIsSidebarOpen(false);
+              }}
+            >
               <FaBell />
               <span className={styles.notificationBadge}>3</span>
             </button>
             
-            <button className={styles.settingsButton} title="Settings">
-              <FaCog />
-            </button>
+            {/* settings button removed */}
 
             <div className={styles.headerUser}>
               <div className={styles.userAvatar}>

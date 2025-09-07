@@ -15,7 +15,6 @@ const Cart = ({ currentLanguage = 'fr' }) => {
   // Order form state matching new database schema
   const [orderForm, setOrderForm] = useState({
     customerName: '',
-    customerEmail: '',
     customerPhone: '',
     shippingAddress: ''
   });
@@ -142,11 +141,7 @@ const Cart = ({ currentLanguage = 'fr' }) => {
       errors.customerName = t.required;
     }
     
-    if (!orderForm.customerEmail.trim()) {
-      errors.customerEmail = t.required;
-    } else if (!/\S+@\S+\.\S+/.test(orderForm.customerEmail)) {
-      errors.customerEmail = t.invalidEmail;
-    }
+  // email removed per request
     
     if (!orderForm.customerPhone.trim()) {
       errors.customerPhone = t.required;
@@ -175,7 +170,7 @@ const Cart = ({ currentLanguage = 'fr' }) => {
       // Create order with new schema - Orders table
       const orderData = {
         customer_name: orderForm.customerName,
-        customer_email: orderForm.customerEmail,
+  customer_email: '', // fallback to satisfy NOT NULL DB constraint
         customer_phone: orderForm.customerPhone,
         shipping_address: orderForm.shippingAddress,
         total_amount: parseFloat(getCartTotal()),
@@ -302,19 +297,7 @@ const Cart = ({ currentLanguage = 'fr' }) => {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="customerEmail">{t.customerEmail} *</label>
-              <input
-                type="email"
-                id="customerEmail"
-                name="customerEmail"
-                value={orderForm.customerEmail}
-                onChange={handleInputChange}
-                className={orderError?.customerEmail ? styles.error : ''}
-                required
-              />
-              {orderError?.customerEmail && (
-                <span className={styles.errorText}>{orderError.customerEmail}</span>
-              )}
+              {/* Email field removed per request */}
             </div>
 
             <div className={styles.formGroup}>

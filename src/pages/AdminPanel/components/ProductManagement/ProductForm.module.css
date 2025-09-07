@@ -90,6 +90,7 @@
   font-size: 1rem;
   transition: border-color 0.3s ease;
   background: white;
+  color: #000000;
 }
 
 .inputGroup input:focus,
@@ -133,6 +134,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   font-size: 0.9rem;
+  color: #000000;
 }
 
 .addImageButton {
@@ -206,6 +208,7 @@
   border-radius: 6px;
   font-size: 0.9rem;
   background: white;
+  color: #000000;
 }
 
 .addTagButton {

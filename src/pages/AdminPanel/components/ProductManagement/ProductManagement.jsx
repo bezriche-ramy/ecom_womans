@@ -17,7 +17,8 @@ import {
 } from 'react-icons/fa';
 import ProductForm from './ProductForm';
 import ConfirmModal from '../Common/ConfirmModal';
-import { getProducts, deleteProduct } from '../../../../services/adminService';
+import { getProducts, deleteProduct, createProduct, updateProduct } from '../../../../services/adminService';
+import { supabaseAdmin } from '../../../../supabaseAdminClient';
 import styles from './ProductManagement.module.css';
 
 const ProductManagement = () => {
@@ -109,31 +110,34 @@ const ProductManagement = () => {
       setIsLoading(true);
       setError(null);
       
-      // Try to fetch from database, fallback to mock data
-      try {
-        const { products: fetchedProducts } = await getProducts(
-          currentPage,
-          productsPerPage,
-          searchTerm,
-          sortBy,
-          sortOrder
-        );
-        setProducts(fetchedProducts);
-      } catch (dbError) {
-        // Fallback to demo data if database connection fails
-        setProducts(mockProducts);
+      console.log('Loading products from database...');
+      
+      // Always try to fetch from database first
+      const { products: fetchedProducts } = await getProducts(
+        currentPage,
+        productsPerPage,
+        searchTerm,
+        sortBy,
+        sortOrder
+      );
+      
+      console.log('Products loaded from database:', fetchedProducts);
+      console.log('Number of products:', fetchedProducts.length);
+      if (fetchedProducts.length > 0) {
+        console.log('First product:', fetchedProducts[0]);
+        console.log('First product ID:', fetchedProducts[0].id, 'type:', typeof fetchedProducts[0].id);
       }
+      setProducts(fetchedProducts);
       
     } catch (error) {
-      console.error('Error loading products:', error);
-      setError('Failed to load products. Please try again.');
-      setProducts(mockProducts);
+      console.error('Error loading products from database:', error);
+      setError(`Failed to load products from database: ${error.message}.`);
+      // IMPORTANT: Do not fallback to mock data; keep products empty so UI reflects real DB failure
+      setProducts([]);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const applyFilters = () => {
+  };  const applyFilters = () => {
     let filtered = [...products];
 
     // Search filter
@@ -200,42 +204,187 @@ const ProductManagement = () => {
     setDeleteConfirm(product);
   };
 
-  const confirmDelete = async () => {
+  // Test database connection and inspect table
+  const testDatabaseConnection = async () => {
     try {
-      // Try to delete from database
-      try {
-        await deleteProduct(deleteConfirm.id);
-      } catch (dbError) {
-        // Database deletion failed, continuing with local state update
+      console.log('=== TESTING DATABASE CONNECTION & TABLE STRUCTURE ===');
+      
+      // Test basic connection
+      const { data, error, count } = await supabaseAdmin
+        .from('products')
+        .select('*', { count: 'exact' })
+        .limit(10);
+      
+      if (error) {
+        console.error('Database connection failed:', error);
+        setError(`Database connection failed: ${error.message}`);
+        return;
       }
       
-      setProducts(prev => prev.filter(p => p.id !== deleteConfirm.id));
-      setDeleteConfirm(null);
+      console.log('✅ Database connection successful!');
+      console.log('Total products in database:', count);
+      console.log('First 10 products:', data);
+      
+      if (data && data.length > 0) {
+        console.log('Sample product structure:', data[0]);
+        console.log('Available columns:', Object.keys(data[0]));
+        console.log('ID field value and type:', data[0].id, typeof data[0].id);
+      } else {
+        console.log('⚠️ Products table is empty!');
+        setError('⚠️ Products table is empty - add some products first');
+        return;
+      }
+      
+      // Test if we can insert a test product
+      console.log('Testing insert capability...');
+      const testProduct = {
+        name: 'Test Product ' + Date.now(),
+        price: 99.99,
+        stock: 1,
+        category: 'test'
+      };
+      
+      const { data: insertData, error: insertError } = await supabaseAdmin
+        .from('products')
+        .insert([testProduct])
+        .select()
+        .single();
+      
+      if (insertError) {
+        console.error('Insert test failed:', insertError);
+        setError(`Insert failed: ${insertError.message}`);
+      } else {
+        console.log('✅ Insert test successful:', insertData);
+        
+        // Test delete on the test product
+        console.log('Testing delete capability...');
+        const { error: deleteError } = await supabaseAdmin
+          .from('products')
+          .delete()
+          .eq('id', insertData.id);
+        
+        if (deleteError) {
+          console.error('Delete test failed:', deleteError);
+          setError(`Delete failed: ${deleteError.message}`);
+        } else {
+          console.log('✅ Delete test successful!');
+          setError('✅ All database operations working correctly!');
+        }
+      }
+      
     } catch (error) {
-      console.error('Error deleting product:', error);
-      setError('Failed to delete product. Please try again.');
+      console.error('Connection test failed:', error);
+      setError(`Connection test failed: ${error.message}`);
     }
   };
 
-  const handleSaveProduct = (productData) => {
-    if (editingProduct) {
-      // Update existing product
-      setProducts(prev => prev.map(p => 
-        p.id === editingProduct.id 
-          ? { ...productData, id: editingProduct.id }
-          : p
-      ));
-    } else {
-      // Add new product
-      const newProduct = {
-        ...productData,
-        id: Date.now(),
-        created_at: new Date().toISOString()
-      };
-      setProducts(prev => [...prev, newProduct]);
+  const confirmDelete = async () => {
+    try {
+      console.log('=== DELETE OPERATION START ===');
+      console.log('Product to delete:', deleteConfirm);
+      console.log('Product ID:', deleteConfirm.id);
+      console.log('Product ID type:', typeof deleteConfirm.id);
+      
+      // Check if deleteProduct function exists
+      console.log('deleteProduct function:', typeof deleteProduct);
+      
+      // Try to delete from database
+      console.log('Calling deleteProduct...');
+      const result = await deleteProduct(deleteConfirm.id);
+      console.log('deleteProduct returned:', result);
+      
+      // Reload products to reflect the deletion
+      console.log('Reloading products...');
+      await loadProducts();
+      console.log('Products reloaded');
+      
+      setDeleteConfirm(null);
+      console.log('=== DELETE OPERATION COMPLETED ===');
+      
+    } catch (error) {
+      console.error('=== DELETE OPERATION FAILED ===');
+      console.error('Error object:', error);
+      console.error('Error message:', error.message);
+      console.error('Error code:', error.code);
+      console.error('Error details:', error.details);
+      setError(`Failed to delete product: ${error.message}. Please check the browser console for details.`);
+      setDeleteConfirm(null);
     }
-    setShowForm(false);
-    setEditingProduct(null);
+  };
+
+  const handleSaveProduct = async (productData) => {
+    try {
+      // Map form data to database schema
+      const dbPayload = {
+        name: productData.name,
+        name_fr: productData.name_fr || '',
+        name_ar: productData.name_ar || '',
+        description: productData.description || '',
+        description_fr: productData.description_fr || '',
+        description_ar: productData.description_ar || '',
+        category: productData.category,
+        category_fr: productData.category_fr || '',
+        category_ar: productData.category_ar || '',
+        price: parseFloat(productData.price),
+        main_image_url: productData.images && productData.images.length > 0 ? productData.images[0] : '',
+        image_urls: productData.images || [],
+        size: Array.isArray(productData.sizes) ? productData.sizes.join(', ') : (productData.sizes || ''),
+        color: Array.isArray(productData.colors) ? productData.colors.join(', ') : (productData.colors || ''),
+        stock: parseInt(productData.stock)
+      };
+
+      console.log('Attempting to save product:', dbPayload);
+
+      if (editingProduct) {
+        // Update existing product
+        try {
+          console.log('Updating product with ID:', editingProduct.id);
+          const updatedProduct = await updateProduct(editingProduct.id, dbPayload);
+          console.log('Product updated successfully:', updatedProduct);
+          
+          // Update local state with DB response
+          setProducts(prev => prev.map(p => 
+            p.id === editingProduct.id ? {
+              ...updatedProduct,
+              sizes: updatedProduct.size ? updatedProduct.size.split(', ') : [],
+              colors: updatedProduct.color ? updatedProduct.color.split(', ') : [],
+              images: updatedProduct.image_urls || []
+            } : p
+          ));
+          
+          // Reload products to ensure consistency
+          await loadProducts();
+          
+        } catch (dbError) {
+          console.error('Database update failed:', dbError);
+          setError(`Failed to update product in database: ${dbError.message}`);
+          // Don't fallback to local update if DB fails - show error instead
+          return;
+        }
+      } else {
+        // Add new product
+        try {
+          console.log('Creating new product');
+          const createdProduct = await createProduct(dbPayload);
+          console.log('Product created successfully:', createdProduct);
+          
+          // Reload products to show the new one
+          await loadProducts();
+          
+        } catch (dbError) {
+          console.error('Database creation failed:', dbError);
+          setError(`Failed to create product in database: ${dbError.message}`);
+          // Don't fallback to local addition if DB fails - show error instead
+          return;
+        }
+      }
+      
+      setShowForm(false);
+      setEditingProduct(null);
+    } catch (error) {
+      console.error('Error saving product:', error);
+      setError('Failed to save product. Please try again.');
+    }
   };
 
   const handleBulkDelete = async () => {
@@ -243,18 +392,19 @@ const ProductManagement = () => {
     
     if (window.confirm(`Delete ${selectedProducts.length} selected products?`)) {
       try {
-        // Try to delete from database
-        try {
-          await Promise.all(selectedProducts.map(id => deleteProduct(id)));
-        } catch (dbError) {
-          // Database bulk deletion failed, continuing with local state update
-        }
+        console.log('Attempting to delete products with IDs:', selectedProducts);
         
-        setProducts(prev => prev.filter(p => !selectedProducts.includes(p.id)));
+        // Try to delete from database
+        await Promise.all(selectedProducts.map(id => deleteProduct(id)));
+        console.log('Products deleted successfully from database');
+        
+        // Reload products to reflect the deletions
+        await loadProducts();
+        
         setSelectedProducts([]);
       } catch (error) {
         console.error('Error deleting products:', error);
-        setError('Failed to delete some products. Please try again.');
+        setError(`Failed to delete some products: ${error.message}`);
       }
     }
   };
@@ -343,6 +493,10 @@ const ProductManagement = () => {
           <button className={styles.refreshButton} onClick={loadProducts}>
             <FaSync />
             Refresh
+          </button>
+          
+          <button className={styles.testButton} onClick={testDatabaseConnection} style={{backgroundColor: '#28a745', color: 'white', marginRight: '10px'}}>
+            🔍 Test Database
           </button>
           
           <button className={styles.addButton} onClick={handleAddProduct}>

@@ -1,20 +1,22 @@
-import { supabase } from '../supabaseClient';
+import { supabaseAdmin } from '../supabaseAdminClient';
 
 // Dashboard Statistics
 export const getDashboardStats = async () => {
   try {
+    console.log('=== GETTING DASHBOARD STATS ===');
+    
     // Get total products
-    const { count: totalProducts } = await supabase
+    const { count: totalProducts } = await supabaseAdmin
       .from('products')
       .select('*', { count: 'exact', head: true });
 
     // Get total orders
-    const { count: totalOrders } = await supabase
+    const { count: totalOrders } = await supabaseAdmin
       .from('orders')
       .select('*', { count: 'exact', head: true });
 
     // Get total revenue from delivered orders
-    const { data: revenueData } = await supabase
+    const { data: revenueData } = await supabaseAdmin
       .from('orders')
       .select('total_amount')
       .eq('status', 'delivered');
@@ -22,13 +24,13 @@ export const getDashboardStats = async () => {
     const totalRevenue = revenueData?.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0) || 0;
 
     // Get low stock products count
-    const { count: lowStockItems } = await supabase
+    const { count: lowStockItems } = await supabaseAdmin
       .from('products')
       .select('*', { count: 'exact', head: true })
       .lt('stock', 10);
 
     // Get total customers (unique emails from orders)
-    const { data: customerData } = await supabase
+    const { data: customerData } = await supabaseAdmin
       .from('orders')
       .select('customer_email');
 
@@ -40,13 +42,13 @@ export const getDashboardStats = async () => {
     const previousMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
     const currentMonthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
 
-    const { data: currentMonthRevenue } = await supabase
+    const { data: currentMonthRevenue } = await supabaseAdmin
       .from('orders')
       .select('total_amount')
       .eq('status', 'delivered')
       .gte('order_date', currentMonthStart.toISOString());
 
-    const { data: previousMonthRevenue } = await supabase
+    const { data: previousMonthRevenue } = await supabaseAdmin
       .from('orders')
       .select('total_amount')
       .eq('status', 'delivered')
@@ -59,19 +61,19 @@ export const getDashboardStats = async () => {
     const revenueGrowth = previousTotal > 0 ? ((currentTotal - previousTotal) / previousTotal) * 100 : 0;
 
     // Calculate order growth (current month vs previous month)
-    const { count: currentMonthOrders } = await supabase
+    const { count: currentMonthOrders } = await supabaseAdmin
       .from('orders')
       .select('*', { count: 'exact', head: true })
       .gte('order_date', currentMonthStart.toISOString());
 
-    const { count: previousMonthOrders } = await supabase
+    const { count: previousMonthOrders } = await supabaseAdmin
       .from('orders')
       .select('*', { count: 'exact', head: true })
       .gte('order_date', previousMonth.toISOString())
       .lt('order_date', currentMonthStart.toISOString());    const orderGrowth = previousMonthOrders > 0 ? ((currentMonthOrders - previousMonthOrders) / previousMonthOrders) * 100 : 0;
 
     // Get order status distribution
-    const { data: statusData } = await supabase
+    const { data: statusData } = await supabaseAdmin
       .from('orders')
       .select('status');
 
@@ -92,7 +94,17 @@ export const getDashboardStats = async () => {
     };
   } catch (error) {
     console.error('Error fetching dashboard stats:', error);
-    throw error;
+    // Return zeros instead of throwing - let UI handle empty state
+    return {
+      totalProducts: 0,
+      totalOrders: 0,
+      totalRevenue: 0,
+      lowStockItems: 0,
+      totalCustomers: 0,
+      revenueGrowth: 0,
+      orderGrowth: 0,
+      statusDistribution: {}
+    };
   }
 };
 
@@ -106,20 +118,22 @@ export const getRevenueChartData = async (months = 6) => {
       const monthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
       const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - i + 1, 1);
 
-      const { data: monthlyRevenue } = await supabase
+      // Sum delivered order totals for the month
+      const { data: monthlyRevenueData } = await supabaseAdmin
         .from('orders')
-        .select('total_price')
-        .eq('status', 'completed')
-        .gte('created_at', monthDate.toISOString())
-        .lt('created_at', nextMonth.toISOString());
+        .select('total_amount')
+        .eq('status', 'delivered')
+        .gte('order_date', monthDate.toISOString())
+        .lt('order_date', nextMonth.toISOString());
 
-      const { count: monthlyOrders } = await supabase
+      // Count all orders placed during the month (regardless of status)
+      const { count: monthlyOrders } = await supabaseAdmin
         .from('orders')
         .select('*', { count: 'exact', head: true })
-        .gte('created_at', monthDate.toISOString())
-        .lt('created_at', nextMonth.toISOString());
+        .gte('order_date', monthDate.toISOString())
+        .lt('order_date', nextMonth.toISOString());
 
-      const revenue = monthlyRevenue?.reduce((sum, order) => sum + (order.total_price || 0), 0) || 0;
+      const revenue = monthlyRevenueData?.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0) || 0;
 
       chartData.push({
         period: monthDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
@@ -128,7 +142,7 @@ export const getRevenueChartData = async (months = 6) => {
       });
     }
 
-    return chartData;
+  return chartData;
   } catch (error) {
     console.error('Error fetching revenue chart data:', error);
     return [];
@@ -139,12 +153,12 @@ export const getRevenueChartData = async (months = 6) => {
 export const getTopProducts = async (limit = 10) => {
   try {
     // This requires order_items table to track product sales
-    const { data: orderItems } = await supabase
+    const { data: orderItems } = await supabaseAdmin
       .from('order_items')
       .select(`
         product_id,
         quantity,
-        price,
+        price_each,
         products (
           name,
           main_image_url
@@ -168,7 +182,7 @@ export const getTopProducts = async (limit = 10) => {
         };
       }
       acc[productId].totalQuantity += item.quantity || 0;
-      acc[productId].totalRevenue += (item.quantity || 0) * (item.price || 0);
+  acc[productId].totalRevenue += (item.quantity || 0) * (item.price_each || 0);
       return acc;
     }, {});
 
@@ -187,7 +201,7 @@ export const getTopProducts = async (limit = 10) => {
 // Low Stock Products
 export const getLowStockProducts = async (limit = 10) => {
   try {
-    const { data: lowStockProducts } = await supabase
+    const { data: lowStockProducts } = await supabaseAdmin
       .from('products')
       .select('id, name, category, stock')
       .lt('stock', 10)
@@ -204,7 +218,11 @@ export const getLowStockProducts = async (limit = 10) => {
 // Product Management
 export const getProducts = async (page = 1, limit = 10, search = '', sortBy = 'name', sortOrder = 'asc') => {
   try {
-    let query = supabase
+    console.log('=== GET PRODUCTS START ===');
+    console.log('Parameters:', { page, limit, search, sortBy, sortOrder });
+    console.log('Supabase admin client available:', !!supabaseAdmin);
+    
+    let query = supabaseAdmin
       .from('products')
       .select('*', { count: 'exact' });
 
@@ -221,16 +239,24 @@ export const getProducts = async (page = 1, limit = 10, search = '', sortBy = 'n
     const to = from + limit - 1;
     query = query.range(from, to);
 
+    console.log('Executing query...');
     const { data: products, count, error } = await query;
+    
+    console.log('Query response:', { products: products?.length, count, error });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase query error:', error);
+      throw error;
+    }
 
+    console.log('=== GET PRODUCTS SUCCESS ===');
     return {
       products: products || [],
       totalCount: count || 0,
       totalPages: Math.ceil((count || 0) / limit)
     };
   } catch (error) {
+    console.error('=== GET PRODUCTS FAILED ===');
     console.error('Error fetching products:', error);
     throw error;
   }
@@ -238,7 +264,7 @@ export const getProducts = async (page = 1, limit = 10, search = '', sortBy = 'n
 
 export const createProduct = async (productData) => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('products')
       .insert([productData])
       .select()
@@ -254,7 +280,7 @@ export const createProduct = async (productData) => {
 
 export const updateProduct = async (id, productData) => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('products')
       .update(productData)
       .eq('id', id)
@@ -271,23 +297,62 @@ export const updateProduct = async (id, productData) => {
 
 export const deleteProduct = async (id) => {
   try {
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', id);
+    console.log('=== ADMIN SERVICE DELETE START ===');
+    console.log('Received ID to delete:', id, 'type:', typeof id);
 
-    if (error) throw error;
+    // Ensure id is the correct type (UUID string expected by DB)
+    const idStr = typeof id === 'string' ? id : String(id);
+
+    // 1) Attempt to remove dependent order_items first (simulates ON DELETE CASCADE)
+    // If the table doesn't exist, ignore that specific error and continue
+    try {
+      console.log('Attempting to delete dependent order_items...');
+      const { error: oiError } = await supabaseAdmin
+        .from('order_items')
+        .delete()
+        .eq('product_id', idStr);
+      if (oiError) {
+        // 42P01 => undefined_table; ignore and continue
+        if (oiError.code !== '42P01') {
+          console.warn('Could not delete dependent order_items:', oiError);
+        }
+      } else {
+        console.log('Dependent order_items deleted (if any).');
+      }
+    } catch (childErr) {
+      console.warn('Error while deleting dependent rows, continuing:', childErr);
+    }
+
+    // 2) Now delete the product
+    const { data, error, count } = await supabaseAdmin
+      .from('products')
+      .delete({ count: 'exact' })
+      .eq('id', idStr)
+      .select('id', { count: 'exact' });
+
+    if (error) {
+      console.error('Supabase delete error:', error);
+      throw error;
+    }
+
+    // When RLS blocks or id doesn't exist, no rows are affected
+    const affected = Array.isArray(data) ? data.length : (typeof count === 'number' ? count : 0);
+    if (!affected) {
+      const err = new Error('No product deleted (id not found, blocked by RLS, or FK constraint)');
+      err.code = 'NO_ROWS_DELETED';
+      throw err;
+    }
+
+    console.log('=== ADMIN SERVICE DELETE SUCCESS ===', { affected });
     return true;
   } catch (error) {
-    console.error('Error deleting product:', error);
+    console.error('=== ADMIN SERVICE DELETE FAILED ===', error);
     throw error;
   }
-};
-
-// Order Management
+};// Order Management
 export const getOrders = async (page = 1, limit = 10, search = '', statusFilter = 'all', sortBy = 'order_date', sortOrder = 'desc') => {
   try {
-    let query = supabase
+    let query = supabaseAdmin
       .from('orders')
       .select(`
         order_id,
@@ -364,7 +429,7 @@ export const getOrders = async (page = 1, limit = 10, search = '', statusFilter 
 
 export const updateOrderStatus = async (orderId, status) => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('orders')
       .update({ 
         status
@@ -388,13 +453,13 @@ export const uploadProductImage = async (file, productId) => {
     const fileName = `${productId}-${Date.now()}.${fileExt}`;
     const filePath = `product-images/${fileName}`;
 
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabaseAdmin.storage
       .from('product-images')
       .upload(filePath, file);
 
     if (uploadError) throw uploadError;
 
-    const { data: { publicUrl } } = supabase.storage
+    const { data: { publicUrl } } = supabaseAdmin.storage
       .from('product-images')
       .getPublicUrl(filePath);
 

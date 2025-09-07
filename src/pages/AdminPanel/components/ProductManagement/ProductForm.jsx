@@ -5,10 +5,14 @@ import styles from './ProductForm.module.css';
 const ProductForm = ({ product, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     name: '',
+    name_fr: '',
     name_ar: '',
     description: '',
+    description_fr: '',
     description_ar: '',
     category: '',
+    category_fr: '',
+    category_ar: '',
     price: '',
     images: [],
     sizes: [],
@@ -22,10 +26,13 @@ const ProductForm = ({ product, onSave, onCancel }) => {
   const [newImageUrl, setNewImageUrl] = useState('');
 
   const categories = [
-    { value: 'robes', label: 'Dresses' },
-    { value: 'hauts', label: 'Tops' },
-    { value: 'bas', label: 'Bottoms' },
-    { value: 'accessoires', label: 'Accessories' }
+    { value: 'robes', label: 'Dresses', label_fr: 'Robes', label_ar: 'فساتين' },
+    { value: 'hauts', label: 'Tops', label_fr: 'Hauts', label_ar: 'بلوزات' },
+    { value: 'bas', label: 'Bottoms', label_fr: 'Bas', label_ar: 'سراويل' },
+    { value: 'accessoires', label: 'Accessories', label_fr: 'Accessoires', label_ar: 'إكسسوارات' },
+    { value: 'chaussures', label: 'Shoes', label_fr: 'Chaussures', label_ar: 'أحذية' },
+    { value: 'jackets', label: 'Jackets', label_fr: 'Vestes', label_ar: 'سترات' },
+    { value: 'tops', label: 'Tops', label_fr: 'Tops', label_ar: 'قمصان' }
   ];
 
   const commonSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -35,14 +42,18 @@ const ProductForm = ({ product, onSave, onCancel }) => {
     if (product) {
       setFormData({
         name: product.name || '',
+        name_fr: product.name_fr || '',
         name_ar: product.name_ar || '',
         description: product.description || '',
+        description_fr: product.description_fr || '',
         description_ar: product.description_ar || '',
         category: product.category || '',
+        category_fr: product.category_fr || '',
+        category_ar: product.category_ar || '',
         price: product.price?.toString() || '',
-        images: product.images || [],
-        sizes: product.sizes || [],
-        colors: product.colors || [],
+        images: product.images || product.image_urls || [],
+        sizes: product.sizes || (product.size ? product.size.split(', ') : []),
+        colors: product.colors || (product.color ? product.color.split(', ') : []),
         stock: product.stock?.toString() || '',
         status: product.status || 'active'
       });
@@ -51,10 +62,23 @@ const ProductForm = ({ product, onSave, onCancel }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    // Auto-populate category translations when category is selected
+    if (name === 'category') {
+      const selectedCategory = categories.find(cat => cat.value === value);
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+        category_fr: selectedCategory?.label_fr || '',
+        category_ar: selectedCategory?.label_ar || ''
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+    
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
@@ -206,6 +230,18 @@ const ProductForm = ({ product, onSave, onCancel }) => {
             </div>
 
             <div className={styles.inputGroup}>
+              <label htmlFor="name_fr">Product Name (French)</label>
+              <input
+                type="text"
+                id="name_fr"
+                name="name_fr"
+                value={formData.name_fr}
+                onChange={handleChange}
+                placeholder="Nom du produit en français"
+              />
+            </div>
+
+            <div className={styles.inputGroup}>
               <label htmlFor="category">Category *</label>
               <select
                 id="category"
@@ -225,7 +261,7 @@ const ProductForm = ({ product, onSave, onCancel }) => {
             </div>
 
             <div className={styles.inputGroup}>
-              <label htmlFor="price">Price ($) *</label>
+              <label htmlFor="price">Price (DZD) *</label>
               <input
                 type="number"
                 id="price"
@@ -279,6 +315,18 @@ const ProductForm = ({ product, onSave, onCancel }) => {
               onChange={handleChange}
               rows="3"
               placeholder="Enter product description"
+            />
+          </div>
+
+          <div className={styles.inputGroup}>
+            <label htmlFor="description_fr">Description (French)</label>
+            <textarea
+              id="description_fr"
+              name="description_fr"
+              value={formData.description_fr}
+              onChange={handleChange}
+              rows="3"
+              placeholder="Description du produit en français"
             />
           </div>
 

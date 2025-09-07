@@ -173,6 +173,46 @@
   gap: 0.25rem;
 }
 
+/* Growth pill (up / down / neutral) */
+.growthPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.growthPositive {
+  background: rgba(16,185,129,0.12);
+  color: #059669;
+  border: 1px solid rgba(16,185,129,0.18);
+}
+
+.growthNegative {
+  background: rgba(239,68,68,0.08);
+  color: #ef4444;
+  border: 1px solid rgba(239,68,68,0.12);
+}
+
+.growthNeutral {
+  background: rgba(107,114,128,0.06);
+  color: #6b7280;
+  border: 1px solid rgba(107,114,128,0.06);
+}
+
+.growthValue {
+  font-size: 0.9rem;
+}
+
+.growthLabel {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-left: 0.5rem;
+  font-weight: 600;
+}
+
 .statMeta {
   margin-top: 0.5rem;
 }
@@ -259,7 +299,21 @@
 
 /* Revenue Chart */
 .revenueChart {
-  height: 300px;
+  height: 380px;
+  position: relative;
+  padding-bottom: 1.5rem; /* space for labels */
+}
+
+.revenueChart::before {
+  /* subtle baseline for the chart area */
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 78px; /* sit above labels */
+  height: 1px;
+  background: #eef2f7;
+  pointer-events: none;
 }
 
 .chartContainer {
@@ -276,57 +330,62 @@
   height: 100%;
   width: 100%;
   padding: 1rem 0;
+  justify-content: space-between;
 }
 
 .chartBar {
-  flex: 1;
+  flex: 0 0 64px; /* fixed bar width for better visual balance */
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
   cursor: pointer;
+  transition: transform 0.18s ease;
+}
+
+.chartBar:hover {
+  transform: translateY(-6px);
 }
 
 .barTooltip {
   position: absolute;
-  top: -60px;
-  background: #1f2937;
-  color: white;
-  padding: 0.5rem;
-  border-radius: 6px;
-  font-size: 0.75rem;
+  top: -72px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(15, 23, 42, 0.95);
+  color: #fff;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
   white-space: nowrap;
   opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
   pointer-events: none;
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.3);
   z-index: 10;
-}
-
-.barTooltip strong {
-  display: block;
-  margin-bottom: 0.25rem;
 }
 
 .chartBar:hover .barTooltip {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
 }
 
 .bar {
   width: 100%;
-  max-width: 40px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 4px 4px 0 0;
+  height: 0%; /* controlled inline from JSX */
+  max-height: 100%;
+  background: linear-gradient(180deg, var(--blossom-primary, #e75480) 0%, var(--blossom-dark, #d13968) 100%);
+  border-radius: 8px 8px 4px 4px;
   position: relative;
-  min-height: 20px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  min-height: 12px;
+  transition: height 0.6s cubic-bezier(.2,.9,.2,1), transform 0.18s ease;
+  box-shadow: 0 6px 18px rgba(209, 213, 219, 0.4);
+  transform-origin: bottom;
 }
 
 .bar:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+  transform: scaleY(1.03);
+  box-shadow: 0 10px 30px rgba(209, 213, 219, 0.5);
 }
 
 .barGradient {
@@ -334,28 +393,34 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 30%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, transparent 100%);
-  border-radius: 4px 4px 0 0;
+  height: 35%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.25), transparent);
+  border-radius: 8px 8px 0 0;
 }
 
 .barLabel {
-  margin-top: 0.75rem;
+  margin-top: 0.6rem;
   text-align: center;
   width: 100%;
 }
 
 .period {
-  font-size: 0.75rem;
-  color: #6b7280;
+  font-size: 0.8rem;
+  color: #374151;
   margin-bottom: 0.25rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .amount {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #1f2937;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--blossom-dark, #d13968);
+}
+
+@media (max-width: 600px) {
+  .revenueChart { height: 260px; }
+  .chartBar { flex: 0 0 44px; }
+  .revenueChart::before { bottom: 64px; }
 }
 
 /* Status Grid */
